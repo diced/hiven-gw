@@ -27,11 +27,14 @@ func main() {
 
 		switch msg["op"] {
 		case float64(1):
-			done := make(chan bool)
 			go func() {
-				defer close(done)
+				gate.Websocket.M.Lock()
+				defer gate.Websocket.M.Unlock()
 				for {
 					gate.Websocket.Heartbeat()
+					if !gateway.CheckEmpty("DEBUG") {
+						gate.Stats()
+					}
 					time.Sleep(30 * time.Second)
 				}
 			}()

@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"log"
+	"sync"
 
 	"github.com/gorilla/websocket"
 )
@@ -10,6 +11,7 @@ import (
 type Websocket struct {
 	URL    string
 	Socket *websocket.Conn
+	M sync.Mutex
 }
 
 // NewWebsocket creates a new gateway websocket struct ^
