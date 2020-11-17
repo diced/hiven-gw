@@ -27,13 +27,15 @@ func main() {
 
 		switch msg["op"] {
 		case float64(1):
+			var overall [][]int
 			go func() {
-				gate.Websocket.M.Lock()
-				defer gate.Websocket.M.Unlock()
 				for {
 					gate.Websocket.Heartbeat()
 					if !gateway.CheckEmpty("DEBUG") {
-						gate.Stats()
+						a := make([]int, 0, 999999)
+						overall = append(overall, a)
+						gate.Stats(true)
+						overall = nil
 					}
 					time.Sleep(30 * time.Second)
 				}

@@ -1,7 +1,6 @@
 package gateway
 
 import (
-	"log"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -11,7 +10,7 @@ import (
 type Websocket struct {
 	URL    string
 	Socket *websocket.Conn
-	M sync.Mutex
+	M      sync.Mutex
 }
 
 // NewWebsocket creates a new gateway websocket struct ^
@@ -29,23 +28,33 @@ func NewWebsocket(url string) Websocket {
 
 // SendOP sends an opcode to socket
 func (w *Websocket) SendOP(code int) {
-	w.Socket.WriteJSON(map[string]interface{}{
+	w.M.Lock()
+	defer w.M.Unlock()
+
+	w.Socket.WriteJSON(Map{
 		"op": code,
+	})
+}
+
+// SendOPData sends an opcode with data to socket
+func (w *Websocket) SendOPData(code int, data Map) {
+	w.M.Lock()
+	defer w.M.Unlock()
+
+	w.Socket.WriteJSON(Map{
+		"op": code,
+		"d":  data,
 	})
 }
 
 // Reconnect func
 func (w *Websocket) Reconnect(token string) {
-	w.Socket.WriteJSON(map[string]interface{}{
-		"op": 2,
-		"d": map[string]interface{}{
-			"token": token,
-		},
+	w.SendOPData(2, Map{
+		"token": token,
 	})
 }
 
 // Heartbeat sends op code 3, used in a go routine
 func (w *Websocket) Heartbeat() {
-	log.Println("hb")
 	w.SendOP(3)
 }
