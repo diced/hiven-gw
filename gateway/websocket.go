@@ -2,7 +2,6 @@ package gateway
 
 import (
 	"log"
-	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -45,9 +44,6 @@ func (w *Websocket) Reconnect(token string) {
 
 // Heartbeat sends op code 3, used in a go routine
 func (w *Websocket) Heartbeat() {
-	for {
-		log.Println("hb")
-		w.SendOP(3)
-		time.Sleep(30 * time.Second)
-	}
+	log.Println("hb")
+	w.SendOP(3)
 }

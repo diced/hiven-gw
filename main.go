@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"time"
 
 	"github.com/diced/hivengw/gateway"
 	"github.com/joho/godotenv"
@@ -26,7 +27,14 @@ func main() {
 
 		switch msg["op"] {
 		case float64(1):
-			go gate.Websocket.Heartbeat()
+			done := make(chan bool)
+			go func() {
+				defer close(done)
+				for {
+					gate.Websocket.Heartbeat()
+					time.Sleep(30 * time.Second)
+				}
+			}()
 			gate.Websocket.Reconnect(gate.Config.Token)
 		default:
 			b, err := json.Marshal(msg)
