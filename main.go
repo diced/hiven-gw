@@ -9,10 +9,21 @@ import (
 	"github.com/joho/godotenv"
 )
 
+func enabledEvent(events []string, event string) bool {
+	for i := range events {
+		if events[i] == event {
+			return false
+		}
+	}
+
+	return true
+}
+
 func main() {
 	godotenv.Load()
 
 	gate := gateway.NewGateway(gateway.ParseEnv())
+	log.Println(gate.Config.DisabledEvents)
 
 	// interrupt := make(chan os.Signal, 1)
 	// signal.Notify(interrupt, os.Interrupt)
@@ -21,8 +32,12 @@ func main() {
 		log.Println("using zlib compression method")
 	}
 
+	// if gate.Config.Influx.Client != nil {
+	// 	// to be implemented
+	// }
+
 	for {
-		var msg gateway.Map
+		var msg gateway.HivenResponse
 		_, m, err := gate.Websocket.Socket.ReadMessage()
 		if err != nil {
 			log.Fatal(m, err)
@@ -41,36 +56,39 @@ func main() {
 			}
 		}
 
-		if !gateway.CheckEmpty("DEBUG") {
-			log.Println("op:", msg["op"], " e:", msg["e"])
-		}
-
-		switch msg["op"] {
-		case float64(1):
-			var overall [][]int
-			done := make(chan bool)
-			go func() {
-				defer close(done)
-				for {
-					gate.Websocket.Heartbeat()
-					if !gateway.CheckEmpty("DEBUG") {
-						a := make([]int, 0, 999999)
-						overall = append(overall, a)
-						gate.Stats(true)
-						overall = nil
-					}
-					time.Sleep(30 * time.Second)
-				}
-			}()
-			gate.Websocket.Reconnect(gate.Config.Token)
-		default:
-			b, err := json.Marshal(msg)
-			if err != nil {
-				log.Fatal(err)
+		if enabledEvent(gate.Config.DisabledEvents, msg.Event) {
+			if !gateway.CheckEmpty("DEBUG") {
+				log.Println("op:", msg.OpCode, " e:", msg.Event)
 			}
-			_, err = gate.Redis.Do("RPUSH", gate.Config.List, string(b))
-			if err != nil {
-				log.Fatal(err)
+
+			switch msg.OpCode {
+			case 1:
+				var overall [][]int
+				done := make(chan bool)
+				go func() {
+					defer close(done)
+					for {
+						gate.Websocket.Heartbeat()
+						if !gateway.CheckEmpty("DEBUG") {
+							a := make([]int, 0, 999999)
+							overall = append(overall, a)
+							gate.Stats(true)
+							overall = nil
+						}
+						time.Sleep(30 * time.Second)
+					}
+				}()
+				gate.Websocket.Reconnect(gate.Config.Token)
+			default:
+
+				b, err := json.Marshal(msg)
+				if err != nil {
+					log.Fatal(err)
+				}
+				_, err = gate.Redis.Do("RPUSH", gate.Config.List, string(b))
+				if err != nil {
+					log.Fatal(err)
+				}
 			}
 		}
 	}

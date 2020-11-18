@@ -65,7 +65,7 @@ func (w *Websocket) Heartbeat() {
 }
 
 // Uncompress zlib compressed text into Map
-func (w *Websocket) Uncompress(m []byte, msg *Map) {
+func (w *Websocket) Uncompress(m []byte, msg *HivenResponse) {
 	b := bytes.NewReader(m)
 
 	r, err := zlib.NewReader(b)
@@ -77,7 +77,7 @@ func (w *Websocket) Uncompress(m []byte, msg *Map) {
 	io.Copy(&uncompressed, r)
 	r.Close()
 
-	var data *Map
+	var data *HivenResponse
 
 	json.Unmarshal([]byte(uncompressed.String()), &data)
 

@@ -11,6 +11,14 @@ import (
 // Map alias for map[string]interface{}
 type Map map[string]interface{}
 
+// HivenResponse swarm response
+type HivenResponse struct {
+	OpCode int         `json:"op"`
+	Data   interface{} `json:"d"`
+	Event  string      `json:"e"`
+	Seq    int         `json:"seq"`
+}
+
 // Gateway struct
 type Gateway struct {
 	Redis     redis.Conn
