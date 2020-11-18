@@ -30,7 +30,7 @@ func main() {
 		} else {
 			json.Unmarshal(m, &msg)
 		}
-		
+
 		if !gateway.CheckEmpty("DEBUG") {
 			log.Println("op:", msg["op"], " e:", msg["e"])
 		}
@@ -38,7 +38,9 @@ func main() {
 		switch msg["op"] {
 		case float64(1):
 			var overall [][]int
+			done := make(chan bool)
 			go func() {
+				defer close(done)
 				for {
 					gate.Websocket.Heartbeat()
 					if !gateway.CheckEmpty("DEBUG") {
