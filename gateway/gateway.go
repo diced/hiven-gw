@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"runtime"
@@ -54,6 +55,14 @@ func (g *Gateway) Stats(hb bool) {
 	}
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
-
+	b, err := json.Marshal(Map{"e": "stats", "stats": m})
+	if err != nil {
+		log.Println("could not marshal stats skipping")
+	} else {
+		_, err = g.Redis.Do("RPUSH", g.Config.List, string(b))
+		if err != nil {
+			log.Println("could not rpush stats")
+		}
+	}
 	log.Printf("%valloc: %v mb  totalloc: %v mb  sys: %v mb  gc: %v\n", s, m.Alloc/1024/1024, m.TotalAlloc/1024/1024, m.Sys/1024/1024, m.NumGC)
 }
