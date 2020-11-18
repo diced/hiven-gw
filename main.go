@@ -25,7 +25,7 @@ func main() {
 		var msg gateway.Map
 		_, m, err := gate.Websocket.Socket.ReadMessage()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal(m, err)
 		}
 
 		if gate.Config.CompressionZlib {
@@ -52,7 +52,7 @@ func main() {
 			go func() {
 				defer close(done)
 				for {
-					// gate.Websocket.Heartbeat()
+					gate.Websocket.Heartbeat()
 					if !gateway.CheckEmpty("DEBUG") {
 						a := make([]int, 0, 999999)
 						overall = append(overall, a)
