@@ -8,9 +8,10 @@ import (
 
 // Env config vars
 type Env struct {
-	Token string
-	Redis string
-	List  string
+	Token           string
+	Redis           string
+	List            string
+	CompressionZlib bool
 }
 
 // ParseEnv from dotenv
@@ -23,10 +24,17 @@ func ParseEnv() Env {
 		}
 	}
 
+	zlib := false
+
+	if !CheckEmpty("ZLIB") {
+		zlib = true
+	}
+
 	return Env{
-		Token: os.Getenv("TOKEN"),
-		Redis: os.Getenv("REDIS"),
-		List:  os.Getenv("LIST"),
+		Token:           os.Getenv("TOKEN"),
+		Redis:           os.Getenv("REDIS"),
+		List:            os.Getenv("LIST"),
+		CompressionZlib: zlib,
 	}
 }
 

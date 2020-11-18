@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"fmt"
 	"log"
 	"runtime"
 
@@ -24,9 +25,15 @@ func NewGateway(config Env) Gateway {
 		log.Fatal(err)
 	}
 
+	encoding := "text_json"
+
+	if config.CompressionZlib {
+		encoding = "zlib_json"
+	}
+
 	return Gateway{
 		Redis:     redis,
-		Websocket: NewWebsocket("wss://swarm-dev.hiven.io/socket?encoding=json&compression=text_zlib"),
+		Websocket: NewWebsocket(fmt.Sprintf("wss://swarm-dev.hiven.io/socket?encoding=json&compression=%v", encoding)),
 		Config:    config,
 	}
 }

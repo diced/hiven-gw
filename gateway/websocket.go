@@ -1,6 +1,11 @@
 package gateway
 
 import (
+	"bytes"
+	"compress/zlib"
+	"encoding/json"
+	"io"
+	"strings"
 	"sync"
 
 	"github.com/gorilla/websocket"
@@ -57,4 +62,24 @@ func (w *Websocket) Reconnect(token string) {
 // Heartbeat sends op code 3, used in a go routine
 func (w *Websocket) Heartbeat() {
 	w.SendOP(3)
+}
+
+// Uncompress zlib compressed text into Map
+func (w *Websocket) Uncompress(m []byte, msg *Map) {
+	b := bytes.NewReader(m)
+
+	r, err := zlib.NewReader(b)
+	if err != nil {
+		panic(err)
+	}
+
+	var uncompressed strings.Builder
+	io.Copy(&uncompressed, r)
+	r.Close()
+
+	var data *Map
+
+	json.Unmarshal([]byte(uncompressed.String()), &data)
+
+	*msg = *data
 }

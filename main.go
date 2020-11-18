@@ -14,13 +14,23 @@ func main() {
 
 	gate := gateway.NewGateway(gateway.ParseEnv())
 
+	if gate.Config.CompressionZlib {
+		log.Println("using zlib compression method")
+	}
+
 	for {
-		var msg map[string]interface{}
-		err := gate.Websocket.Socket.ReadJSON(&msg)
+		var msg gateway.Map
+		_, m, err := gate.Websocket.Socket.ReadMessage()
 		if err != nil {
 			log.Fatal(err)
 		}
 
+		if gate.Config.CompressionZlib {
+			gate.Websocket.Uncompress(m, &msg)
+		} else {
+			json.Unmarshal(m, &msg)
+		}
+		
 		if !gateway.CheckEmpty("DEBUG") {
 			log.Println("op:", msg["op"], " e:", msg["e"])
 		}
