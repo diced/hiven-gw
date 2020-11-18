@@ -56,12 +56,5 @@ func (g *Gateway) Stats(hb bool) {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 
-	b, err := json.Marshal(m)
-	if err != nil {
-		log.Println("could not marshall stats, skipping sending")
-	} else {
-		g.Redis.Do("RPUSH", "stats", b)
-	}
-
 	log.Printf("%valloc: %v mb  totalloc: %v mb  sys: %v mb  gc: %v\n", s, m.Alloc/1024/1024, m.TotalAlloc/1024/1024, m.Sys/1024/1024, m.NumGC)
 }
