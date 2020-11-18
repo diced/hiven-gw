@@ -23,7 +23,7 @@ func main() {
 	godotenv.Load()
 
 	gate := gateway.NewGateway(gateway.ParseEnv())
-	log.Println(gate.Config.DisabledEvents)
+	log.Println("using disabled events:", gate.Config.DisabledEvents)
 
 	// interrupt := make(chan os.Signal, 1)
 	// signal.Notify(interrupt, os.Interrupt)
