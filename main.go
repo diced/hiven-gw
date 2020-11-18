@@ -14,6 +14,9 @@ func main() {
 
 	gate := gateway.NewGateway(gateway.ParseEnv())
 
+	// interrupt := make(chan os.Signal, 1)
+	// signal.Notify(interrupt, os.Interrupt)
+
 	if gate.Config.CompressionZlib {
 		log.Println("using zlib compression method")
 	}
@@ -28,7 +31,14 @@ func main() {
 		if gate.Config.CompressionZlib {
 			gate.Websocket.Uncompress(m, &msg)
 		} else {
-			json.Unmarshal(m, &msg)
+			_, r, err := gate.Websocket.Socket.NextReader()
+			if err != nil {
+				log.Fatal(err)
+			}
+			err = json.NewDecoder(r).Decode(&msg)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 
 		if !gateway.CheckEmpty("DEBUG") {
@@ -42,7 +52,7 @@ func main() {
 			go func() {
 				defer close(done)
 				for {
-					gate.Websocket.Heartbeat()
+					// gate.Websocket.Heartbeat()
 					if !gateway.CheckEmpty("DEBUG") {
 						a := make([]int, 0, 999999)
 						overall = append(overall, a)
