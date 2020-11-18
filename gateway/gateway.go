@@ -66,3 +66,10 @@ func (g *Gateway) Stats(hb bool) {
 	}
 	log.Printf("%valloc: %v mb  totalloc: %v mb  sys: %v mb  gc: %v\n", s, m.Alloc/1024/1024, m.TotalAlloc/1024/1024, m.Sys/1024/1024, m.NumGC)
 }
+
+// DebugLog sends a debuglog with hiven res
+func (g *Gateway) DebugLog(msg HivenResponse) {
+	if !CheckEmpty("DEBUG") {
+		log.Println("op:", msg.OpCode, " e:", msg.Event)
+	}
+}

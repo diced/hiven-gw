@@ -25,16 +25,9 @@ func main() {
 	gate := gateway.NewGateway(gateway.ParseEnv())
 	log.Println("using disabled events:", gate.Config.DisabledEvents)
 
-	// interrupt := make(chan os.Signal, 1)
-	// signal.Notify(interrupt, os.Interrupt)
-
 	if gate.Config.CompressionZlib {
 		log.Println("using zlib compression method")
 	}
-
-	// if gate.Config.Influx.Client != nil {
-	// 	// to be implemented
-	// }
 
 	for {
 		var msg gateway.HivenResponse
@@ -56,40 +49,37 @@ func main() {
 			}
 		}
 
-		if enabledEvent(gate.Config.DisabledEvents, msg.Event) {
-			if !gateway.CheckEmpty("DEBUG") {
-				log.Println("op:", msg.OpCode, " e:", msg.Event)
-			}
-
-			switch msg.OpCode {
-			case 1:
-				var overall [][]int
-				done := make(chan bool)
-				go func() {
-					defer close(done)
-					for {
-						gate.Websocket.Heartbeat()
-						if !gateway.CheckEmpty("DEBUG") {
-							a := make([]int, 0, 999999)
-							overall = append(overall, a)
-							gate.Stats(true)
-							overall = nil
-						}
-						time.Sleep(30 * time.Second)
+		switch msg.OpCode {
+		case 1:
+			gate.DebugLog(msg)
+			var overall [][]int
+			done := make(chan bool)
+			go func() {
+				defer close(done)
+				for {
+					gate.Websocket.Heartbeat()
+					if !gateway.CheckEmpty("DEBUG") {
+						a := make([]int, 0, 999999)
+						overall = append(overall, a)
+						gate.Stats(true)
+						overall = nil
 					}
-				}()
-				gate.Websocket.Reconnect(gate.Config.Token)
-			default:
-
-				b, err := json.Marshal(msg)
-				if err != nil {
-					log.Fatal(err)
+					time.Sleep(30 * time.Second)
 				}
-				_, err = gate.Redis.Do("RPUSH", gate.Config.List, string(b))
-				if err != nil {
-					log.Fatal(err)
-				}
+			}()
+			gate.Websocket.Reconnect(gate.Config.Token)
+		default:
+			// if enabledEvent(gate.Config.DisabledEvents, msg.Event) {
+			gate.DebugLog(msg)
+			b, err := json.Marshal(msg)
+			if err != nil {
+				log.Fatal(err)
 			}
+			_, err = gate.Redis.Do("RPUSH", gate.Config.List, string(b))
+			if err != nil {
+				log.Fatal(err)
+			}
+			// }
 		}
 	}
 }
