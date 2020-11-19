@@ -69,17 +69,17 @@ func main() {
 			}()
 			gate.Websocket.Reconnect(gate.Config.Token)
 		default:
-			// if enabledEvent(gate.Config.DisabledEvents, msg.Event) {
-			gate.DebugLog(msg)
-			b, err := json.Marshal(msg)
-			if err != nil {
-				log.Fatal(err)
+			if enabledEvent(gate.Config.DisabledEvents, msg.Event) {
+				gate.DebugLog(msg)
+				b, err := json.Marshal(msg)
+				if err != nil {
+					log.Fatal(err)
+				}
+				_, err = gate.Redis.Do("RPUSH", gate.Config.List, string(b))
+				if err != nil {
+					log.Fatal(err)
+				}
 			}
-			_, err = gate.Redis.Do("RPUSH", gate.Config.List, string(b))
-			if err != nil {
-				log.Fatal(err)
-			}
-			// }
 		}
 	}
 }

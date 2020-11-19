@@ -80,17 +80,6 @@ func (w *Websocket) Uncompress(m []byte, msg *HivenResponse) {
 	var data *HivenResponse
 
 	json.Unmarshal([]byte(uncompressed.String()), &data)
-
-	// wr, err := w.Socket.NextWriter(websocket.TextMessage)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// err = json.NewEncoder(wr).Encode(&data)
-	// err = wr.Close()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
+	
 	*msg = *data
 }
