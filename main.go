@@ -43,8 +43,8 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			err = json.NewDecoder(r).Decode(&msg)
-			if err != nil {
+			err2 := json.NewDecoder(r).Decode(&msg)
+			if err2 != nil {
 				log.Fatal(err)
 			}
 		}
@@ -75,7 +75,7 @@ func main() {
 				if err != nil {
 					log.Fatal(err)
 				}
-				_, err = gate.Redis.Do("RPUSH", gate.Config.List, string(b))
+				_, err = gate.Redis.Do("RPUSH", gate.Config.List, b)
 				if err != nil {
 					log.Fatal(err)
 				}

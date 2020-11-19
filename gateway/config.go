@@ -25,10 +25,10 @@ func ParseEnv() Env {
 		}
 	}
 
-	zlib := false
+	zlib := true
 
-	if !CheckEmpty("ZLIB") {
-		zlib = true
+	if CheckEmpty("ZLIB") {
+		zlib = false
 	}
 
 	var disabledEv []string

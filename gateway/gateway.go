@@ -34,10 +34,10 @@ func NewGateway(config Env) Gateway {
 		log.Fatal(err)
 	}
 
-	encoding := "text_json"
+	encoding := "zlib_json"
 
-	if config.CompressionZlib {
-		encoding = "zlib_json"
+	if !config.CompressionZlib {
+		encoding = "text_json"
 	}
 
 	return Gateway{
